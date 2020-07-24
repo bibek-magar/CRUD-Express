@@ -1,10 +1,4 @@
 const mysql = require("mysql");
-const express = require("express");
-
-let app = express();
-const bodyParser = require("body-parser");
-
-app.use(bodyParser.json());
 
 let mysqlConnection = mysql.createConnection({
   host: "localhost",
@@ -24,12 +18,7 @@ mysqlConnection.connect((err) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Express server is running at port 3000");
-});
-
-//Get all employees
-app.get("/employees", (req, res) => {
+exports.getEmployees = (req, res) => {
   mysqlConnection.query("SELECT * FROM employee", (err, rows, fields) => {
     if (!err) {
       res.send(rows);
@@ -37,22 +26,8 @@ app.get("/employees", (req, res) => {
       console.log(err);
     }
   });
-});
-
-//Get an employee
-app.get("/employees/:id", (req, res) => {
-  mysqlConnection.query(
-    "SELECT * FROM employee WHERE EmpID = ?",
-    [req.params.id],
-    (err, rows, field) => {
-      if (!err) res.send(rows);
-      else console.log(err);
-    }
-  );
-});
-
-//Delete an employee
-app.delete("/employees/:id", (req, res) => {
+};
+exports.deleteEmployees = (req, res) => {
   mysqlConnection.query(
     "DELETE FROM employee WHERE EmpID = ?",
     [req.params.id],
@@ -61,14 +36,12 @@ app.delete("/employees/:id", (req, res) => {
       else console.log(err);
     }
   );
-});
-
-//Insert an employee
-app.post("/employees", (req, res) => {
+};
+exports.addEmployees = function (req, res) {
   let emp = req.body;
   let sql =
     "SET @EmpID = ?;SET @Name = ?;SET @EmpCode = ?; SET @Salary = ?; \
-    CALL EmployeeAddOrEdit(@EmpId,@Name,@EmpCode,@Salary);";
+      CALL EmployeeAddOrEdit(@EmpId,@Name,@EmpCode,@Salary);";
   mysqlConnection.query(
     sql,
     [emp.EmpId, emp.Name, emp.EmpCode, emp.Salary],
@@ -82,6 +55,4 @@ app.post("/employees", (req, res) => {
       } else console.log(err);
     }
   );
-});
-
-//
+};
